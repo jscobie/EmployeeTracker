@@ -1,3 +1,6 @@
+# Personal ignores
+_provided_files/
+
 # Logs
 logs
 *.log
