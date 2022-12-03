@@ -33,82 +33,72 @@ connection.connect(function (err) {
   });
 
   // this is the Tracker program itself which will run and call additional functions to process additional steps in the application
-function StartTracker(){
-inquirer.prompt([
-{
-    type: 'list',
-    name:'userChoice',
-    message: 'What would you like to do?',
-    choices: [
-    'View All Departments',
-    'View All Roles',
-    'View All Employees',
-    'Add a Department',
-    'Add a Role',
-    'Add an Employee',
-    'Update an Employee Role',
-    'Update Employee Manager',
-    'View Employees by Manager',
-    'View Employees by Department',
-    'Delete a Department',
-    'Delete a Role',
-    'Delete an Employee',
-    'Exit'
-    ]
-    
-}
-
-]).then((res) => {
-    console.log(res.userChoice);
-    switch(res.userChoice){
-        case 'View All Departments':
-            viewAllDepartments();
-            break;
-        case 'View All Roles':
-            viewAllRoles();
-            break;
-        case 'View All Employees':
-            viewAllEmployees();
-            break;
-        case 'Add a Department':
-            addDepartment();
-            break;
-        case 'Add a Role':
-            addRole();
-            break;
-        case 'Add an Employee':
-            addEmployee();
-            break;
-        case 'Update an Employee Role':
-            updateEmployeeRole();
-            break;
-        case 'Update Employee Manager':
-            updateEmployeeManager();
-            break;
-        case 'View Employees by Manager':
-            viewEmployeesByManager();
-            break;
-        case 'View Employees By Department':
-            viewEmployeesByDepartment();
-            break;
-            case 'Delete a Department': 
-            removeDepartment();
-            break;
-            case 'Delete a Role': 
-            removeRole();
-            break;    
-        case 'Delete an Employee': 
-            removeEmployee();
-            break;
-        case 'Exit':
-            connection.end();
-            break;
+function startTracker(){
+    inquirer.prompt([
+    {
+        type: 'list',
+        name:'userChoice',
+        message: 'What would you like to do?',
+        choices: [
+        'View All Departments', //complete
+        'View All Roles', //complete
+        'View All Employees', //complete
+        'Add a Department', //complete
+        'Add a Role', //complete
+        'Add an Employee', //complete
+        'Update an Employee Role', //complete
+        //'Update Employee Manager',
+        //'View Employees by Manager',
+        'View Employees by Department', //complete
+        //'Delete a Department',
+        //'Delete a Role',
+        'Delete an Employee', //complete
+        'Exit'
+        ]
     }
-    
-    }).catch((err)=>{
-if(err)throw err;
-});
-}
+
+    ]).then((res) => {
+        console.log(res.userChoice);
+        switch(res.userChoice){
+            case 'View All Departments':
+                viewAllDepartments();
+                // done
+                break;
+            case 'View All Roles':
+                viewAllRoles();
+                // done
+                break;
+            case 'View All Employees':
+                viewAllEmployees();
+                // done
+                break;
+            case 'Add a Department':
+                addDepartment();
+                break;
+            case 'Add a Role':
+                addRole();
+                break;
+            case 'Add an Employee':
+                addEmployee();
+                break;
+            case 'Update an Employee Role':
+                updateEmployeeRole();
+                break;
+            case 'View Employees By Department':
+                viewEmployeesByDepartment();
+                break;
+            case 'Delete an Employee': 
+                removeEmployee();
+                break;
+            case 'Exit':
+                connection.end();
+                break;
+        }
+        
+        }).catch((err) => {
+    if(err)throw err;
+    });
+};
 
 // View Departments
 function viewAllDepartments() {
@@ -135,7 +125,21 @@ function viewAllRoles() {
 // View Employees
 function viewAllEmployees() {
     // select from the db
-    let query = "SELECT * FROM employee";
+    let query = `SELECT 
+    employee.id, 
+    employee.first_name, 
+    employee.last_name, 
+    role.title, 
+    department.name AS department, 
+    role.salary, 
+    CONCAT(manager.first_name, ' ', manager.last_name) AS manager
+    FROM employee
+    LEFT JOIN role
+        ON employee.role_id = role.id
+    LEFT JOIN department
+        ON department.id = role.department_id
+    LEFT JOIN employee manager
+    ON manager.id = employee.manager_id`;
     connection.query(query, function(err, res) {
       if (err) throw err;
       console.table(res);
@@ -143,3 +147,298 @@ function viewAllEmployees() {
     });
 };
 
+// Add Department
+function addDepartment() {
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "name",
+          message: "Department Name: "
+        }
+      ]).then((res)=>{
+      let query = `INSERT INTO department SET ?`
+      connection.query(query, {name: res.name},(err, res) = > {
+        if(err) throw err;
+        startTracker();
+      });
+    });
+};
+
+// Add Role
+function addRole() {
+    var query = 
+    `SELECT 
+      department.id, 
+      department.name, 
+      role.salary
+    FROM employee
+    JOIN role
+      ON employee.role_id = role.id
+    JOIN department
+      ON department.id = role.department_id
+    GROUP BY department.id, department.name`;  
+    connection.query(query,(err, res)=>{
+      if(err)throw err;
+      const department = res.map(({ id, name }) => ({
+        value: id,
+        name: `${id} ${name}`
+      }));
+      console.table(res);
+      addRoleUser(department);
+    });
+};
+
+// Add role user inputs
+function addRoleUser(department){
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "title",
+          message: "Enter Title: "
+        },
+        {
+          type: "input",
+          name: "salary",
+          message: "Type Salary: "
+        },
+        {
+          type: "list",
+          name: "department",
+          message: "Select Department: ",
+          choices: department
+        },
+      ]).then((res)=>{
+        let query = `INSERT INTO role SET ?`  
+        connection.query(query, {
+            title: res.title,
+            salary: res.salary,
+            department_id: res.department
+        },(err, res)=>{
+            if(err) throw err;
+            startTracker();
+        });
+    });
+};
+
+//Add employee
+function addEmployee() {
+    let query = 
+    `SELECT 
+        role.id, 
+        role.title, 
+        role.salary 
+    FROM role`;
+    connection.query(query,(err, res)=>{
+        if(err)throw err;
+        const role = res.map(({ id, title, salary }) => ({
+        value: id, 
+        title: `${title}`, 
+        salary: `${salary}`
+    }));
+
+    console.table(res);
+    employeeRoles(role);
+  });
+};
+
+// Add employee user inputs
+function employeeRoles(role) {
+    inquirer
+      .prompt([
+      {
+        type: "input",
+        name: "firstName",
+        message: "Employee First Name: "
+      },
+      {
+        type: "input",
+        name: "lastName",
+        message: "Employee Last Name: "
+      },
+      {
+        type: "list",
+        name: "roleId",
+        message: "Employee Role: ",
+        choices: role
+      }
+    ]).then((res)=>{
+        let query = `INSERT INTO employee SET ?`
+        connection.query(query,{
+          first_name: res.firstName,
+          last_name: res.lastName,
+          role_id: res.roleId
+        },(err, res)=>{
+          if(err) throw err;
+          startTracker();
+      });
+    });
+};
+
+// Update Employee Role get users
+function updateEmployeeRole(){
+    let query = `SELECT 
+                    employee.id,
+                    employee.first_name, 
+                    employee.last_name, 
+                    role.title, 
+                    department.name, 
+                    role.salary, 
+                    CONCAT(manager.first_name, ' ', manager.last_name) AS manager
+                    FROM employee
+                    JOIN role
+                    ON employee.role_id = role.id
+                    JOIN department
+                    ON department.id = role.department_id
+                    JOIN employee manager
+                    ON manager.id = employee.manager_id`;
+      connection.query(query,(err, res)=>{
+        if(err)throw err;
+          const employee = res.map(({ id, first_name, last_name }) => ({
+            value: id,
+            name: `${first_name} ${last_name}`      
+        }));
+      console.table(res);
+      updateRole(employee);
+    });
+};
+
+// Update Employee Role user build role choices
+function updateRole(employee){
+  let query = 
+  `SELECT 
+    role.id, 
+    role.title, 
+    role.salary 
+  FROM role`;
+  connection.query(query,(err, res) => {
+    if(err)throw err;
+    let roleChoices = res.map(({ id, title, salary }) => ({
+      value: id, 
+      title: `${title}`, 
+      salary: `${salary}`      
+    }));
+    console.table(res);
+    getUpdatedRole(employee, roleChoices);
+  });
+};
+
+// Update Employee Role user input to then update after building employee and role selections
+function getUpdatedRole(employee, roleChoices) {
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "employee",
+        message: "Employee who's role will be Updated: ",
+        choices: employee
+      },
+      {
+        type: "list",
+        name: "role",
+        message: "Select New Role: ",
+        choices: roleChoices
+      },
+
+    ]).then((res)=>{
+      let query = `UPDATE employee SET role_id = ? WHERE id = ?`
+      connections.query(query,[ res.role, res.employee],(err, res)=>{
+          if(err)throw err;
+          startTracker();
+        });
+    });
+};
+
+// View Employees by Department
+function viewEmployeesByDepartment() {
+    let query =
+    `SELECT 
+        department.id, 
+        department.name, 
+        role.salary
+    FROM employee
+    LEFT JOIN role 
+        ON employee.role_id = role.id
+    LEFT JOIN department
+        ON department.id = role.department_id
+    GROUP BY department.id, department.name, role.salary`;
+    connection.query(query,(err, res) => {
+      if (err) throw err;
+      const deptChoices = res.map((choices) => ({
+          value: choices.id, name: choices.name
+      }));
+    console.table(res);
+    getDept(deptChoices);
+  });
+};
+
+// Get department choices for selecting which
+function getDept(deptChoices){
+    inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'department',
+                message: 'Departments: ',
+                choices: deptChoices
+            }
+        ]).then((res)=>{ 
+        let query = `SELECT 
+                        employee.id, 
+                        employee.first_name, 
+                        employee.last_name, 
+                        role.title, 
+                        department.name
+                    FROM employee
+                    JOIN role
+                        ON employee.role_id = role.id
+                    JOIN department
+                        ON department.id = role.department_id
+                    WHERE department.id = ?`  
+        connection.query(query, res.department,(err, res)=>{
+        if(err)throw err;
+          firstPrompt();
+          console.table(res);
+        });
+    })
+};
+
+// Remove Employee, build list of employees to ask which to delete
+function removeEmployee() {
+    let query =
+    `SELECT
+        employee.id, 
+        employee.first_name, 
+        employee.last_name
+    FROM employee`
+  
+    connection.query(query,(err, res)=>{
+      if(err)throw err;
+      const employee = res.map(({ id, first_name, last_name }) => ({
+        value: id,
+        name: `${id} ${first_name} ${last_name}`
+      }));
+      console.table(res);
+      getDelete(employee);
+    });
+  };
+  
+  // Remove Employee, delete user selected employee
+  function getDelete(employee){  
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "employee",
+          message: "Employee To Be Deleted: ",
+          choices: employee
+        }
+      ]).then((res)=>{
+        let query = `DELETE FROM employee WHERE ?`
+        connection.query(query, { id: res.employee },(err, res)=>{
+          if(err) throw err;
+          startTracker();
+        });
+      });
+  };
