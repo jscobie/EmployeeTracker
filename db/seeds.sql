@@ -15,7 +15,7 @@ VALUES
 ("Egnineering Manager", 175000, 2),
 ("Accountant", 130000, 3),
 ("Paralegal", 50000, 4),
-("Lawyer", 250000, 4)
+("Lawyer", 250000, 4),
 ("President", 375000, 3);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
@@ -28,5 +28,5 @@ VALUES
 ("Andrew", "Jackson", 5, 10),
 ("Martin", "Van Buren", 6, 9),
 ("William", "Harrison", 6, 9),
-("John", "Tyler", 7, 10)
+("John", "Tyler", 7, 10),
 ("Theodore", "Roosevelt", 8, 10);
