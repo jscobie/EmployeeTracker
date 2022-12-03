@@ -32,7 +32,7 @@ connection.connect(function (err) {
     startTracker();
   });
 
-  // this is the Tracker program itself which will run and call additional functions to process additional steps in the application
+  // This is the Tracker program itself which will run and call additional functions to process additional steps in the application
 function startTracker(){
     inquirer.prompt([
     {
@@ -62,15 +62,12 @@ function startTracker(){
         switch(res.userChoice){
             case 'View All Departments':
                 viewAllDepartments();
-                // done
                 break;
             case 'View All Roles':
                 viewAllRoles();
-                // done
                 break;
             case 'View All Employees':
                 viewAllEmployees();
-                // done
                 break;
             case 'Add a Department':
                 addDepartment();
