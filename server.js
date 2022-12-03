@@ -1,23 +1,21 @@
 // require and set dependencies
-const mysql = require("mysql2");
-const inquirer = require("inquirer");
-require("console.table");
-
-const PORT = process.env.PORT || 3001;
+const mysql = require('mysql2');
+const inquirer = require('inquirer');
+const { exit } = require('process');
+require('console.table');
 
 // build mysql database connection
 const connection = mysql.createConnection({ 
     host: "localhost",
-    port: "3001",
     user: "root",
     password: "Password123",
-    database: "employee_DB"
+    database: "employee_db"
 });
 
 connection.connect(function (err) {
     if (err) throw err;
     // this is the ascii art splash title
-    console.log(`███████╗███╗   ███╗██████╗ ██╗      ██████╗ ██╗   ██╗███████╗███████╗
+    console.log(`    ███████╗███╗   ███╗██████╗ ██╗      ██████╗ ██╗   ██╗███████╗███████╗
     ██╔════╝████╗ ████║██╔══██╗██║     ██╔═══██╗╚██╗ ██╔╝██╔════╝██╔════╝
     █████╗  ██╔████╔██║██████╔╝██║     ██║   ██║ ╚████╔╝ █████╗  █████╗  
     ██╔══╝  ██║╚██╔╝██║██╔═══╝ ██║     ██║   ██║  ╚██╔╝  ██╔══╝  ██╔══╝  
@@ -40,19 +38,15 @@ function startTracker(){
         name:'userChoice',
         message: 'What would you like to do?',
         choices: [
-        'View All Departments', //complete
-        'View All Roles', //complete
-        'View All Employees', //complete
-        'Add a Department', //complete
-        'Add a Role', //complete
-        'Add an Employee', //complete
-        'Update an Employee Role', //complete
-        //'Update Employee Manager',
-        //'View Employees by Manager',
-        'View Employees by Department', //complete
-        //'Delete a Department',
-        //'Delete a Role',
-        'Delete an Employee', //complete
+        'View All Departments', //complete & tested
+        'View All Roles', //complete & tested
+        'View All Employees', //complete & tested
+        'Add a Department', //complete & tested
+        'Add a Role', //complete - ERROR on selecting department query error?
+        'Add an Employee', //complete & tested
+        'Update an Employee Role', //complete - ERROR connection issue
+        'View Employees by Department', //complete - ERROR on start get hung
+        'Delete an Employee', //complete & tested
         'Exit'
         ]
     }
@@ -155,7 +149,7 @@ function addDepartment() {
         }
       ]).then((res)=>{
       let query = `INSERT INTO department SET ?`
-      connection.query(query, {name: res.name},(err, res) = > {
+      connection.query(query, {name: res.name},(err, res) => {
         if(err) throw err;
         startTracker();
       });
@@ -352,18 +346,18 @@ function viewEmployeesByDepartment() {
     let query =
     `SELECT 
         department.id, 
-        department.name, 
-        role.salary
+        department.name 
     FROM employee
     LEFT JOIN role 
         ON employee.role_id = role.id
     LEFT JOIN department
         ON department.id = role.department_id
-    GROUP BY department.id, department.name, role.salary`;
+    GROUP BY department.id, department.name`;
     connection.query(query,(err, res) => {
       if (err) throw err;
       const deptChoices = res.map((choices) => ({
-          value: choices.id, name: choices.name
+          value: choices.id, 
+          name: choices.name
       }));
     console.table(res);
     getDept(deptChoices);
@@ -377,7 +371,7 @@ function getDept(deptChoices){
             {
                 type: 'list',
                 name: 'department',
-                message: 'Departments: ',
+                message: 'Which Department?: ',
                 choices: deptChoices
             }
         ]).then((res)=>{ 
@@ -386,7 +380,7 @@ function getDept(deptChoices){
                         employee.first_name, 
                         employee.last_name, 
                         role.title, 
-                        department.name
+                        department.name AS department
                     FROM employee
                     JOIN role
                         ON employee.role_id = role.id
@@ -395,7 +389,7 @@ function getDept(deptChoices){
                     WHERE department.id = ?`  
         connection.query(query, res.department,(err, res)=>{
         if(err)throw err;
-          firstPrompt();
+          startTracker();
           console.table(res);
         });
     })
