@@ -38,15 +38,15 @@ function startTracker(){
         name:'userChoice',
         message: 'What would you like to do?',
         choices: [
-        'View All Departments', //complete & tested
-        'View All Roles', //complete & tested
-        'View All Employees', //complete & tested
-        'Add a Department', //complete & tested
-        'Add a Role', //complete
-        'Add an Employee', //complete & tested
-        'Update an Employee Role', //complete
-        'View Employees by Department', //complete - ERROR on start get hung
-        'Delete an Employee', //complete & tested
+        'View All Departments', //complete & tested x2
+        'View All Roles', //complete & tested x2
+        'View All Employees', //complete & tested x2
+        'Add a Department', //complete & tested x2
+        'Add a Role', //complete x2
+        'Add an Employee', //complete & tested x2
+        'Update an Employee Role', //complete x2
+        'View Employees by Department', //complete x2
+        'Delete an Employee', //complete & tested x2
         'Exit'
         ]
     }
@@ -75,13 +75,17 @@ function startTracker(){
             case 'Update an Employee Role':
                 updateEmployeeRole();
                 break;
-            case 'View Employees By Department':
+            case 'View Employees by Department':
                 viewEmployeesByDepartment();
                 break;
             case 'Delete an Employee': 
                 removeEmployee();
                 break;
             case 'Exit':
+                connection.end();
+                break;
+            default:
+                console.log('Error has occurred');
                 connection.end();
                 break;
         }
@@ -151,6 +155,7 @@ function addDepartment() {
       let query = `INSERT INTO department SET ?`
       connection.query(query, {name: res.name},(err, res) => {
         if(err) throw err;
+        console.log("Department successfully added");
         startTracker();
       });
     });
@@ -212,6 +217,7 @@ function addRoleUser(department){
             department_id: res.department
         },(err, res) => {
             if(err) throw err;
+            console.log("Role successfully added");
             startTracker();
         });
     });
@@ -227,12 +233,10 @@ function addEmployee() {
     FROM role`;
     connection.query(query,(err, res) => {
         if(err)throw err;
-        const role = res.map(({ id, title, salary }) => ({
-        value: id, 
-        title: `${title}`, 
-        salary: `${salary}`
+        const role = res.map(({ id, title}) => ({
+        value: id,
+        name: `${id} ${title}`
     }));
-
     console.table(res);
     employeeRoles(role);
   });
@@ -266,6 +270,7 @@ function employeeRoles(role) {
           role_id: res.roleId
         },(err, res) => {
           if(err) throw err;
+          console.log("Employee successfully added");
           startTracker();
       });
     });
@@ -341,7 +346,7 @@ function getUpdatedRole(employee, roleChoices) {
       let query = `UPDATE employee SET role_id = ? WHERE id = ?`
       connection.query(query,[res.role, res.employee],(err, res) => {
           if(err)throw err;
-          console.log("Employee Role updated successfully")
+          console.log("Employee role updated successfully")
           startTracker();
         });
     });
@@ -349,20 +354,16 @@ function getUpdatedRole(employee, roleChoices) {
 
 // View Employees by Department
 function viewEmployeesByDepartment() {
-    console.log('point a');
     let query =
     `SELECT 
         department.id, 
         department.name 
     FROM department`;
-    console.log('point b');
     connection.query(query, (err, res) => {
       if (err) throw err;
-      console.log('point c');
       const deptChoices = res.map((data) => ({
           value: data.id, name: data.name
       }));
-    console.log('point d');
     console.table(res);
     getDept(deptChoices);
   });
@@ -370,7 +371,6 @@ function viewEmployeesByDepartment() {
 
 // Get department choices for selecting which
 function getDept(deptChoices){
-    console.log("point e");
     inquirer
         .prompt([
             {
@@ -398,8 +398,8 @@ function getDept(deptChoices){
                     WHERE department.id = ?`  
         connection.query(query, res.department,(err, res) => {
         if (err) throw err;
-          startTracker();
           console.table(res);
+          startTracker();
         });
     })
 };
@@ -422,22 +422,23 @@ function removeEmployee() {
       getDelete(employee);
     });
   };
-  
-  // Remove Employee, delete user selected employee
-  function getDelete(employee){  
-    inquirer
-      .prompt([
-        {
-          type: "list",
-          name: "employee",
-          message: "Employee To Be Deleted: ",
-          choices: employee
-        }
-      ]).then((res)=>{
-        let query = `DELETE FROM employee WHERE ?`
-        connection.query(query, { id: res.employee },(err, res) => {
-          if(err) throw err;
-          startTracker();
-        });
+
+// Remove Employee, delete user selected employee
+function getDelete(employee){  
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "employee",
+        message: "Employee To Be Deleted: ",
+        choices: employee
+      }
+    ]).then((res)=>{
+      let query = `DELETE FROM employee WHERE ?`
+      connection.query(query, { id: res.employee },(err, res) => {
+        if(err) throw err;
+        console.log("Employee successfully deleted");
+        startTracker();
       });
-  };
+    });
+};
