@@ -42,9 +42,9 @@ function startTracker(){
         'View All Roles', //complete & tested
         'View All Employees', //complete & tested
         'Add a Department', //complete & tested
-        'Add a Role', //complete - ERROR on selecting department query error?
+        'Add a Role', //complete
         'Add an Employee', //complete & tested
-        'Update an Employee Role', //complete - ERROR connection issue
+        'Update an Employee Role', //complete
         'View Employees by Department', //complete - ERROR on start get hung
         'Delete an Employee', //complete & tested
         'Exit'
@@ -158,24 +158,28 @@ function addDepartment() {
 
 // Add Role
 function addRole() {
-    var query = 
+  let querySelect = 
+    `SELECT * FROM department`;
+  let queryShow = 
     `SELECT 
-      department.id, 
-      department.name, 
-      role.salary
-    FROM employee
-    JOIN role
-      ON employee.role_id = role.id
-    JOIN department
-      ON department.id = role.department_id
-    GROUP BY department.id, department.name`;  
-    connection.query(query,(err, res)=>{
+    role.id, 
+    role.title, 
+    role.salary, 
+    role.department_id,
+    department.name AS 'department_name'
+    FROM role
+    INNER JOIN department
+      ON role.department_id = department.id`;
+    connection.query(queryShow, (err, res) => {
+      if(err)throw err;
+      console.table(res);
+    });    
+    connection.query(querySelect,(err, res) => {
       if(err)throw err;
       const department = res.map(({ id, name }) => ({
         value: id,
         name: `${id} ${name}`
       }));
-      console.table(res);
       addRoleUser(department);
     });
 };
@@ -200,13 +204,13 @@ function addRoleUser(department){
           message: "Select Department: ",
           choices: department
         },
-      ]).then((res)=>{
+      ]).then((res) => {
         let query = `INSERT INTO role SET ?`  
         connection.query(query, {
             title: res.title,
             salary: res.salary,
             department_id: res.department
-        },(err, res)=>{
+        },(err, res) => {
             if(err) throw err;
             startTracker();
         });
@@ -221,7 +225,7 @@ function addEmployee() {
         role.title, 
         role.salary 
     FROM role`;
-    connection.query(query,(err, res)=>{
+    connection.query(query,(err, res) => {
         if(err)throw err;
         const role = res.map(({ id, title, salary }) => ({
         value: id, 
@@ -254,13 +258,13 @@ function employeeRoles(role) {
         message: "Employee Role: ",
         choices: role
       }
-    ]).then((res)=>{
+    ]).then((res) => {
         let query = `INSERT INTO employee SET ?`
         connection.query(query,{
           first_name: res.firstName,
           last_name: res.lastName,
           role_id: res.roleId
-        },(err, res)=>{
+        },(err, res) => {
           if(err) throw err;
           startTracker();
       });
@@ -270,21 +274,21 @@ function employeeRoles(role) {
 // Update Employee Role get users
 function updateEmployeeRole(){
     let query = `SELECT 
-                    employee.id,
-                    employee.first_name, 
-                    employee.last_name, 
-                    role.title, 
-                    department.name, 
-                    role.salary, 
-                    CONCAT(manager.first_name, ' ', manager.last_name) AS manager
-                    FROM employee
-                    JOIN role
-                    ON employee.role_id = role.id
-                    JOIN department
-                    ON department.id = role.department_id
-                    JOIN employee manager
-                    ON manager.id = employee.manager_id`;
-      connection.query(query,(err, res)=>{
+                employee.id,
+                employee.first_name, 
+                employee.last_name, 
+                role.title, 
+                department.name, 
+                role.salary, 
+                CONCAT(manager.first_name, ' ', manager.last_name) AS manager
+                FROM employee
+                JOIN role
+                ON employee.role_id = role.id
+                JOIN department
+                ON department.id = role.department_id
+                JOIN employee manager
+                ON manager.id = employee.manager_id`;
+      connection.query(query,(err, res) => {
         if(err)throw err;
           const employee = res.map(({ id, first_name, last_name }) => ({
             value: id,
@@ -297,6 +301,7 @@ function updateEmployeeRole(){
 
 // Update Employee Role user build role choices
 function updateRole(employee){
+  
   let query = 
   `SELECT 
     role.id, 
@@ -307,8 +312,8 @@ function updateRole(employee){
     if(err)throw err;
     let roleChoices = res.map(({ id, title, salary }) => ({
       value: id, 
-      title: `${title}`, 
-      salary: `${salary}`      
+      title: title, 
+      salary: salary      
     }));
     console.table(res);
     getUpdatedRole(employee, roleChoices);
@@ -334,8 +339,9 @@ function getUpdatedRole(employee, roleChoices) {
 
     ]).then((res)=>{
       let query = `UPDATE employee SET role_id = ? WHERE id = ?`
-      connections.query(query,[ res.role, res.employee],(err, res)=>{
+      connection.query(query,[res.role, res.employee],(err, res) => {
           if(err)throw err;
+          console.log("Employee Role updated successfully")
           startTracker();
         });
     });
@@ -343,22 +349,20 @@ function getUpdatedRole(employee, roleChoices) {
 
 // View Employees by Department
 function viewEmployeesByDepartment() {
+    console.log('point a');
     let query =
     `SELECT 
         department.id, 
         department.name 
-    FROM employee
-    LEFT JOIN role 
-        ON employee.role_id = role.id
-    LEFT JOIN department
-        ON department.id = role.department_id
-    GROUP BY department.id, department.name`;
-    connection.query(query,(err, res) => {
+    FROM department`;
+    console.log('point b');
+    connection.query(query, (err, res) => {
       if (err) throw err;
-      const deptChoices = res.map((choices) => ({
-          value: choices.id, 
-          name: choices.name
+      console.log('point c');
+      const deptChoices = res.map((data) => ({
+          value: data.id, name: data.name
       }));
+    console.log('point d');
     console.table(res);
     getDept(deptChoices);
   });
@@ -366,6 +370,7 @@ function viewEmployeesByDepartment() {
 
 // Get department choices for selecting which
 function getDept(deptChoices){
+    console.log("point e");
     inquirer
         .prompt([
             {
@@ -374,21 +379,25 @@ function getDept(deptChoices){
                 message: 'Which Department?: ',
                 choices: deptChoices
             }
-        ]).then((res)=>{ 
+        ]).then((res) => { 
         let query = `SELECT 
-                        employee.id, 
-                        employee.first_name, 
-                        employee.last_name, 
-                        role.title, 
-                        department.name AS department
+                    employee.id, 
+                    employee.first_name, 
+                    employee.last_name, 
+                    role.title, 
+                    department.name AS department, 
+                    role.salary, 
+                    CONCAT(manager.first_name, ' ', manager.last_name) AS manager
                     FROM employee
-                    JOIN role
+                    LEFT JOIN role
                         ON employee.role_id = role.id
-                    JOIN department
+                    LEFT JOIN department
                         ON department.id = role.department_id
+                    LEFT JOIN employee manager
+                    ON manager.id = employee.manager_id
                     WHERE department.id = ?`  
-        connection.query(query, res.department,(err, res)=>{
-        if(err)throw err;
+        connection.query(query, res.department,(err, res) => {
+        if (err) throw err;
           startTracker();
           console.table(res);
         });
@@ -403,8 +412,7 @@ function removeEmployee() {
         employee.first_name, 
         employee.last_name
     FROM employee`
-  
-    connection.query(query,(err, res)=>{
+      connection.query(query,(err, res) => {
       if(err)throw err;
       const employee = res.map(({ id, first_name, last_name }) => ({
         value: id,
@@ -427,7 +435,7 @@ function removeEmployee() {
         }
       ]).then((res)=>{
         let query = `DELETE FROM employee WHERE ?`
-        connection.query(query, { id: res.employee },(err, res)=>{
+        connection.query(query, { id: res.employee },(err, res) => {
           if(err) throw err;
           startTracker();
         });
