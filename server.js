@@ -45,10 +45,10 @@ function startTracker(){
         'Add a Role', //complete x2
         'Add an Employee', //complete & tested x2
         'Update an Employee Role', //complete x2
-        'View Employees by Department', //complete x2
-        'Delete an Employee', //complete & tested x2
-        'Delete a Role', //complete & tested x2
-        'Delete a Department', //complete & tested x2
+        'View Employees by Department', // BONUS //complete x2
+        'Delete an Employee', // BONUS //complete & tested x2
+        'Delete a Role', // BONUS //complete & tested x2
+        'Delete a Department', // BONUS //complete & tested x2
         'Exit'
         ]
     }
