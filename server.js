@@ -47,6 +47,8 @@ function startTracker(){
         'Update an Employee Role', //complete x2
         'View Employees by Department', //complete x2
         'Delete an Employee', //complete & tested x2
+        'Delete a Role', //complete & tested x2
+        'Delete a Department', //complete & tested x2
         'Exit'
         ]
     }
@@ -81,6 +83,12 @@ function startTracker(){
             case 'Delete an Employee': 
                 removeEmployee();
                 break;
+            case 'Delete a Role':
+                removeRole();
+                break;
+            case 'Delete a Department':
+                removeDepartment();
+                break;
             case 'Exit':
                 connection.end();
                 break;
@@ -89,7 +97,6 @@ function startTracker(){
                 connection.end();
                 break;
         }
-        
         }).catch((err) => {
     if(err)throw err;
     });
@@ -419,12 +426,12 @@ function removeEmployee() {
         name: `${id} ${first_name} ${last_name}`
       }));
       console.table(res);
-      getDelete(employee);
+      getEmployeeDelete(employee);
     });
   };
 
 // Remove Employee, delete user selected employee
-function getDelete(employee){  
+function getEmployeeDelete(employee){  
   inquirer
     .prompt([
       {
@@ -438,6 +445,83 @@ function getDelete(employee){
       connection.query(query, { id: res.employee },(err, res) => {
         if(err) throw err;
         console.log("Employee successfully deleted");
+        startTracker();
+      });
+    });
+};
+
+// Remove Role, build list of roles to ask which to delete
+function removeRole() {
+  let query =
+  `SELECT
+      role.id, 
+      role.title, 
+      role.salary
+  FROM role`
+    connection.query(query,(err, res) => {
+    if(err)throw err;
+    const role = res.map(({ id, title, salary }) => ({
+      value: id,
+      name: `${id} ${title} ${salary}`
+    }));
+    console.table(res);
+    getRoleDelete(role);
+  });
+};
+
+// Remove Role, delete user selected role
+function getRoleDelete(role){  
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "role",
+        message: "Role To Be Deleted: ",
+        choices: role
+      }
+    ]).then((res) => {
+      let query = `DELETE FROM role WHERE ?`
+      connection.query(query, { id: res.role },(err, res) => {
+        if(err) throw err;
+        console.log("Role successfully deleted");
+        startTracker();
+      });
+    });
+};
+
+// Remove Department, build list of departments to ask which to delete
+function removeDepartment() {
+  let query =
+  `SELECT
+      id, 
+      name
+  FROM department`
+    connection.query(query,(err, res) => {
+    if(err)throw err;
+    const dept = res.map(({ id, name }) => ({
+      value: id,
+      name: `${id} ${name}`
+    }));
+    console.table(res);
+    getDepartmentDelete(dept);
+  });
+};
+
+// Remove Department, delete user selected department
+function getDepartmentDelete(dept){  
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "department",
+        message: "Department To Be Deleted: ",
+        choices: dept
+      }
+    ]).then((res) => {
+      let query = `DELETE FROM department WHERE ?`
+      connection.query(query, { id: res.department },(err, res) => {
+        if(err) throw err;
+        console.log("Department successfully deleted");
         startTracker();
       });
     });
