@@ -38,14 +38,15 @@ function startTracker(){
         name:'userChoice',
         message: 'What would you like to do?',
         choices: [
-        'View All Departments', //complete & tested x2
-        'View All Roles', //complete & tested x2
-        'View All Employees', //complete & tested x2
+        'View all Departments', //complete & tested x2
+        'View all Roles', //complete & tested x2
+        'View all Employees', //complete & tested x2
         'Add a Department', //complete & tested x2
         'Add a Role', //complete x2
         'Add an Employee', //complete & tested x2
         'Update an Employee Role', //complete x2
         'View Employees by Department', // BONUS //complete x2
+        'View Utilized Budget by Department', // BONUS // complete x2
         'Delete an Employee', // BONUS //complete & tested x2
         'Delete a Role', // BONUS //complete & tested x2
         'Delete a Department', // BONUS //complete & tested x2
@@ -56,13 +57,13 @@ function startTracker(){
     ]).then((res) => {
         console.log(res.userChoice);
         switch(res.userChoice){
-            case 'View All Departments':
+            case 'View all Departments':
                 viewAllDepartments();
                 break;
-            case 'View All Roles':
+            case 'View all Roles':
                 viewAllRoles();
                 break;
-            case 'View All Employees':
+            case 'View all Employees':
                 viewAllEmployees();
                 break;
             case 'Add a Department':
@@ -79,6 +80,9 @@ function startTracker(){
                 break;
             case 'View Employees by Department':
                 viewEmployeesByDepartment();
+                break;
+            case 'View Utilized Budget by Department':
+              viewBudgetByDepartment();
                 break;
             case 'Delete an Employee': 
                 removeEmployee();
@@ -318,14 +322,12 @@ function updateRole(employee){
   `SELECT 
     role.id, 
     role.title, 
-    role.salary 
   FROM role`;
   connection.query(query,(err, res) => {
     if(err)throw err;
-    let roleChoices = res.map(({ id, title, salary }) => ({
+    let roleChoices = res.map(({ id, title }) => ({
       value: id, 
-      title: title, 
-      salary: salary      
+      name: `${id} ${title}`     
     }));
     console.table(res);
     getUpdatedRole(employee, roleChoices);
@@ -376,7 +378,7 @@ function viewEmployeesByDepartment() {
   });
 };
 
-// Get department choices for selecting which
+// Get department choices for selecting which for Employees by Department
 function getDept(deptChoices){
     inquirer
         .prompt([
@@ -409,6 +411,48 @@ function getDept(deptChoices){
           startTracker();
         });
     })
+};
+
+// View Utilized Budget by Department (combined salaries by department)
+function viewBudgetByDepartment() {
+  let query =
+  `SELECT 
+      department.id, 
+      department.name 
+  FROM department`;
+  connection.query(query, (err, res) => {
+    if (err) throw err;
+    const deptBudgetChoices = res.map((data) => ({
+        value: data.id, name: data.name
+    }));
+  console.table(res);
+  getBudgetDept(deptBudgetChoices);
+});
+};
+
+// Get department choices for selecting which for Utilized Budget per Department
+function getBudgetDept(deptBudgetChoices){
+  inquirer
+      .prompt([
+          {
+              type: 'list',
+              name: 'department',
+              message: 'Which Department?: ',
+              choices: deptBudgetChoices
+          }
+      ]).then((res) => { 
+      let query = `SELECT 
+                      department.name AS department,
+                      sum(role.salary) AS utilized_budget
+                  FROM (role INNER JOIN department ON role.department_id = department.id) INNER JOIN employee ON role.id = employee.role_id
+                  WHERE department.id = ?
+                  GROUP BY department.name`  
+      connection.query(query, res.department,(err, res) => {
+      if (err) throw err;
+        console.table(res);
+        startTracker();
+      });
+  })
 };
 
 // Remove Employee, build list of employees to ask which to delete

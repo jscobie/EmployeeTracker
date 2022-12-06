@@ -10,7 +10,10 @@ This project's challenge  was built to show my continued learning in Full Stack 
 [Github Repository Link](https://github.com/jscobie/NoteTaker)<br>
 [Git Hub Deployed page link (not functioning just repository site hosting readme file)](https://jscobie.github.io/NoteTaker/)
 
-Video walkthrough of the working Employee Tracker command line application:<br>
+Video walkthrough of the working Employee Tracker command line application (challenge required options):<br>
+[Video walkthrough of completed application](https://jscobie.github.io/NoteTaker/)
+
+Bonus Video walkthrough of the working Employee Tracker command line application (BONUS options: Delete Employee, Department, Role; View Employees by Manager; View Utilized Budget by Department):<br>
 [Video walkthrough of completed application](https://jscobie.github.io/NoteTaker/)
 
 ## Table of Contents
