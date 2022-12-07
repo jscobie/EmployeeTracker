@@ -9,8 +9,8 @@ This project's challenge  was built to show my continued learning in Full Stack 
 
 Additionally in a reach to Module 13 I have added the dotenv option so I can hide my MySQL connection properties, mainly the user/password combination, since storing that on Github is unwise.
 
-[Github Repository Link](https://github.com/jscobie/NoteTaker)<br>
-[Git Hub Deployed page link (not functioning since project is a command line application, this is just a repository site hosting the readme.md file)](https://jscobie.github.io/NoteTaker/)
+[Github Repository Link](https://github.com/jscobie/EmployeeTracker)<br>
+[Git Hub Deployed page link (not functioning since project is a command line application, this is just a repository site hosting the readme.md file)](https://jscobie.github.io/EmployeeTracker/)
 
 Video walkthrough of the working Employee Tracker command line application (challenge required options):<br>
 [Video walkthrough of completed application](https://drive.google.com/file/d/1dylDoVNBgwwhaMt1b8In5L0bHgfT7SiV/view)
@@ -32,7 +32,7 @@ Bonus Video walkthrough of the working Employee Tracker command line application
 
 1. Clone to your computer using SSH from GitHub:
 ```
-git clone git@github.com:jscobie/NoteTaker.git
+git clone git@github.com:jscobie/EmployeeTracker.git
 ```
 2. You'll need to run to install the node required dependencies after you clone the install by running:
 ```
