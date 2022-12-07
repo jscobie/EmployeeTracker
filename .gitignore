@@ -1,5 +1,6 @@
 # Personal ignores
 _provided_files/
+.env
 
 # Logs
 logs

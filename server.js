@@ -3,13 +3,14 @@ const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const { exit } = require('process');
 require('console.table');
+require('dotenv').config();
 
 // build mysql database connection
 const connection = mysql.createConnection({ 
-    host: "localhost",
-    user: "root",
-    password: "Password123",
-    database: "employee_db"
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DBASE
 });
 
 connection.connect(function (err) {
@@ -321,7 +322,7 @@ function updateRole(employee){
   let query = 
   `SELECT 
     role.id, 
-    role.title, 
+    role.title 
   FROM role`;
   connection.query(query,(err, res) => {
     if(err)throw err;

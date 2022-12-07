@@ -8,13 +8,13 @@
 This project's challenge  was built to show my continued learning in Full Stack web development. This project I have learned and will be using SQL and MySQL to populate values into a database and retrieve them through HTTP requests using an Express Server. This Employee Tracker is not a website but a command line interface to manage an employee database using Node.js, select NPM packages (Inquirer, MySQL2, and Console.table), and a MySQL database.
 
 [Github Repository Link](https://github.com/jscobie/NoteTaker)<br>
-[Git Hub Deployed page link (not functioning just repository site hosting readme file)](https://jscobie.github.io/NoteTaker/)
+[Git Hub Deployed page link (not functioning since project is a command line application, this is just a repository site hosting the readme.md file)](https://jscobie.github.io/NoteTaker/)
 
 Video walkthrough of the working Employee Tracker command line application (challenge required options):<br>
-[Video walkthrough of completed application](https://jscobie.github.io/NoteTaker/)
+[Video walkthrough of completed application](https://drive.google.com/file/d/1dylDoVNBgwwhaMt1b8In5L0bHgfT7SiV/view)
 
 Bonus Video walkthrough of the working Employee Tracker command line application (BONUS options: Delete Employee, Department, Role; View Employees by Manager; View Utilized Budget by Department):<br>
-[Video walkthrough of completed application](https://jscobie.github.io/NoteTaker/)
+[Video walkthrough of completed application BONUS items](https://drive.google.com/file/d/1jbo_ZCKQnOjJy0pA7KWIZJBRzW7ra6qo/view)
 
 ## Table of Contents
 
@@ -37,7 +37,7 @@ git clone git@github.com:jscobie/NoteTaker.git
 npm install
 ```
 3. You'll then need to configure your MySQL user/password in the server.js file
-4. You will then need to run the following commands in your MySQL server command line to build and populate the database and tables needed:
+4. You will then need to run the following commands in your MySQL server command line to build the database and tables and then seed/populate the tables needed:
 ```
 mysql -u root -p
 SOURCE db/schema.sql
